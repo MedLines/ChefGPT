@@ -3,10 +3,15 @@
 }
 
 body {
-    margin: 0;
+    margin: 0 auto;        /* center body horizontally */
     font-family: Inter, sans-serif;
     background-color: #FAFAF8;
     max-width: 800px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center; /* vertical center children */
+    align-items: center;     /* horizontal center children inside body */
+    min-height: 100vh;      /* make body fill viewport so justify-content works */
 }
 
 header {
