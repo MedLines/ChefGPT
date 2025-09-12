@@ -5,15 +5,7 @@ import { getRecipeFromChefGPT } from "./ai"
 
 export default function Main() {
     const [ingredients, setIngredients] = React.useState(
-        ["Fettuccine pasta",
-  "Butter",
-  "Heavy cream",
-  "Garlic",
-  "Parmesan cheese",
-  "Salt",
-  "Black pepper",
-  "Parsley"
-       ]
+        [       ]
             )
     const [recipe, setRecipe] = React.useState("")
     const [loading, setLoading] = React.useState(false)
