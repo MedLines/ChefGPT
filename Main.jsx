@@ -4,11 +4,15 @@ import ClaudeRecipe from "./components/ClaudeRecipe"
 import { getRecipeFromChefGPT } from "./ai"
 
 export default function Main() {
-    const [ingredients, setIngredients] = React.useState(
-        [       ]
-            )
+    const [ingredients, setIngredients] = React.useState([] )
     const [recipe, setRecipe] = React.useState("")
     const [loading, setLoading] = React.useState(false)
+    const recipeSection = React.useRef(null)
+
+    React.useEffect(()=>{
+        recipeSection.current && recipe && recipeSection.current.scrollIntoView()
+    },[recipe])
+
 
     async function getRecipe() {
         try {

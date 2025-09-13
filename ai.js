@@ -89,8 +89,7 @@ export async function getRecipeFromChefGPT(ingredientsArr) {
             const resp = await client.responses.create({
                 model: 'gpt-5-mini',
                 input: `${SYSTEM_PROMPT}\nUser: Here are the ingredients I have: ${ingredientsString}\nPlease suggest one recipe formatted in markdown.`,
-                max_output_tokens: 800,
-            })
+                })
             // Try to pull text from common response shapes
             if (resp.output && Array.isArray(resp.output) && resp.output[0].content) {
                 const content = resp.output.map(o => (o.content[0] && o.content[0].text) || '').join('\n')
