@@ -2,6 +2,7 @@
 import { ChefHat, Loader2, Send, Sparkles, Trash2 } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import ReactMarkdown from 'react-markdown'
+import { toast } from 'sonner'
 
 import RecipeDisplay, { Recipe } from '@/components/RecipeDisplay'
 import { Badge } from '@/components/ui/badge'
@@ -56,6 +57,7 @@ export default function Home() {
   const [strictMode, setStrictMode] = useState(false)
   const [recipe, setRecipe] = useState<Recipe | null>(null)
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
   const [chatInput, setChatInput] = useState('')
   const [chatHistory, setChatHistory] = useState<
     { role: 'user' | 'assistant'; content: string }[]
@@ -124,12 +126,11 @@ export default function Home() {
   }
 
   function handleSelectIngredient(item: string) {
-    setIngredientInput(item)
-    // We can auto-add or just set value.
-    // Let's just set value so user can click Add or verify.
-    // Or better, let's auto-add if they click a suggestion?
-    // User expectation for "dropdown" in this context might be "fill".
-    // I'll stick to set value + focus ref if I had one, but keeping it simple:
+    if (!ingredients.includes(item)) {
+      setIngredients((prev) => [...prev, item])
+      toast.success(`Added ${item}`)
+    }
+    setIngredientInput('')
     setShowDropdown(false)
   }
 
@@ -140,13 +141,20 @@ export default function Home() {
   async function handleGenerate() {
     if (ingredients.length === 0) return
     setLoading(true)
+    setError('')
     setRecipe(null)
     setChatHistory([]) // Reset chat on new recipe
     try {
-      const data = await generateRecipeAction(ingredients, strictMode)
-      setRecipe(data)
-    } catch (error) {
-      console.error(error)
+      const result = await generateRecipeAction(ingredients, strictMode)
+      if (result.success && result.recipe) {
+        setRecipe(result.recipe)
+      } else if (result.error) {
+        setError(result.error)
+        toast.error(result.error)
+      }
+    } catch (e) {
+      console.error(e)
+      toast.error('Something went wrong. Please try again.')
     } finally {
       setLoading(false)
     }
@@ -327,6 +335,13 @@ export default function Home() {
               Generate Recipe
             </Button>
           </div>
+          {error && (
+            <div className="text-center mt-4 animate-in fade-in slide-in-from-top-2">
+              <p className="text-destructive text-sm font-medium bg-destructive/10 border border-destructive/20 inline-block px-4 py-2 rounded-lg">
+                {error}
+              </p>
+            </div>
+          )}
         </div>
 
         {/* Recipe Display */}

@@ -1,6 +1,9 @@
 'use server'
 
+import { headers } from 'next/headers'
 import OpenAI from 'openai'
+
+import { checkRateLimit } from '@/lib/rate-limit'
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -9,7 +12,18 @@ const openai = new OpenAI({
 export async function generateRecipeAction(
   ingredients: string | string[],
   strictMode: boolean,
-) {
+): Promise<{ success: boolean; error?: string; recipe?: any }> {
+  // Rate Limiting Check
+  const ip = (await headers()).get('x-forwarded-for') || 'unknown'
+  const isAllowed = checkRateLimit(ip)
+
+  if (!isAllowed) {
+    return {
+      success: false,
+      error: 'Rate limit exceeded: You can only generate 5 recipes per hour.',
+    }
+  }
+
   const ingredientString = Array.isArray(ingredients)
     ? ingredients.join(', ')
     : ingredients
@@ -48,10 +62,14 @@ ${
 
     const content = response.choices[0].message.content
     if (!content) throw new Error('No content returned')
-    return JSON.parse(content)
+    const recipe = JSON.parse(content)
+    return { success: true, recipe }
   } catch (error) {
     console.error('Error generating recipe:', error)
-    throw error
+    return {
+      success: false,
+      error: 'Failed to generate recipe. Please try again.',
+    }
   }
 }
 
